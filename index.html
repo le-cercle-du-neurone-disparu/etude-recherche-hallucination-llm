@@ -86,6 +86,7 @@ img{max-width:100%}
   }
 }
 :root[data-theme="dark"]{
+  color-scheme:dark;
   --shell:hsl(0 0% 4%); --canvas:hsl(0 0% 4%); --surface:hsl(0 0% 12%);
   --ink:hsl(0 0% 92%); --muted:hsl(0 0% 62%);
   --border:hsl(222 55% 80%); --shell-border:hsl(222 55% 80%);
@@ -98,6 +99,8 @@ img{max-width:100%}
   --shadow:drop-shadow(0 5px 16px hsl(0 0% 0% / .7));
   --shadow-sm:drop-shadow(0 2px 7px hsl(0 0% 0% / .6));
 }
+
+:root[data-theme="light"]{color-scheme:light}
 
 /* ---------- Base ---------- */
 *{box-sizing:border-box}
@@ -133,6 +136,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--r-badge);outline-of
 }
 :root[data-theme="dark"] .topnav a:hover{background:hsl(0 0% 16%)}
 :root[data-theme="dark"] .topnav a.sel{background:hsl(0 0% 22%);color:hsl(222 55% 88%)}
+
+#theme{align-self:center;margin-left:6px;background:var(--c4);color:hsl(28 70% 12%);
+  filter:var(--shadow-sm)}
+:root[data-theme="dark"] #theme{background:hsl(28 96% 57%);color:hsl(0 0% 8%)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) #theme{background:hsl(28 96% 57%);color:hsl(0 0% 8%)}
+}
 
 /* ---------- Coque ---------- */
 .shell{display:grid;grid-template-columns:236px minmax(0,1fr);gap:0;align-items:start}
@@ -234,6 +244,16 @@ pre,code{font-size:var(--fs)}
 </style>
 </head>
 <body>
+<!-- corps -->
+<script>
+/* Applique le theme memorise avant le premier rendu, pour eviter le flash. */
+(function(){
+  try{
+    var t=localStorage.getItem('theme');
+    if(t==='dark'||t==='light') document.documentElement.setAttribute('data-theme',t);
+  }catch(e){}
+})();
+</script>
 <header class="topbar">
   <span class="brand">Aletheia · Veille<br><small>Détection d'hallucinations LLM — état du terrain, septembre 2026</small></span>
   <nav class="topnav">
@@ -243,6 +263,7 @@ pre,code{font-size:var(--fs)}
     <a href="#berlue">Pour Berlue</a>
     <a href="#fiabilite">Fiabilité</a>
   </nav>
+  <button id="theme" type="button">Thème : système</button>
 </header>
 
 <div class="shell">
@@ -792,6 +813,27 @@ pre,code{font-size:var(--fs)}
       a.classList.toggle('sel',a.getAttribute('href')==='#'+best);
     });
   }
+  var order=['system','light','dark'],
+      label={system:'Thème : système',light:'Thème : clair',dark:'Thème : sombre'},
+      btn=document.getElementById('theme'),
+      cur='system';
+  try{var st=localStorage.getItem('theme'); if(st==='dark'||st==='light') cur=st;}catch(e){}
+  function paint(){
+    if(cur==='system') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme',cur);
+    btn.textContent=label[cur];
+    measure();sync();
+  }
+  btn.addEventListener('click',function(){
+    cur=order[(order.indexOf(cur)+1)%order.length];
+    try{
+      if(cur==='system') localStorage.removeItem('theme');
+      else localStorage.setItem('theme',cur);
+    }catch(e){}
+    paint();
+  });
+  paint();
+
   window.addEventListener('scroll',sync,{passive:true});
   window.addEventListener('resize',function(){measure();sync();},{passive:true});
   measure();sync();
