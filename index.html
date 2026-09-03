@@ -53,6 +53,7 @@ img{max-width:100%}
   --fs-h6:15px; --fs-h5:17.7px; --fs-h4:20.9px;
   --fs-h3:24.6px; --fs-h2:29.1px; --fs-h1:34.3px;
 
+  --topbar-h:58px;   /* recalcule au chargement, la barre passe a la ligne en etroit */
   --f-title:"Palatino Linotype",Palatino,"Book Antiqua",serif;
   --f-body:Georgia,"Iowan Old Style",Charter,serif;
 }
@@ -114,7 +115,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--r-badge);outline-of
 
 /* ---------- Barre du haut ---------- */
 .topbar{background:var(--r-nav);color:var(--r-nav-text);display:flex;align-items:baseline;
-  gap:14px;padding:6px 12px;filter:var(--shadow);position:relative;z-index:3;
+  gap:14px;padding:6px 12px;filter:var(--shadow);position:sticky;top:0;z-index:5;
   border-bottom:1px solid var(--shell-border);flex-wrap:wrap}
 .topbar .brand{font-family:var(--f-title);font-size:var(--fs-h4);color:hsl(222 45% 96%)}
 .topbar .brand small{font-family:var(--f-body);font-size:var(--fs);color:var(--r-nav-text);
@@ -140,7 +141,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--r-badge);outline-of
 /* ---------- Sidebar multi-niveaux ---------- */
 .side{background:var(--r-side);color:var(--r-side-text);padding:6px 0 14px;
   filter:var(--shadow);border-right:1px solid var(--shell-border);
-  position:sticky;top:0;max-height:100vh;overflow:auto}
+  position:sticky;top:var(--topbar-h);max-height:calc(100vh - var(--topbar-h));overflow:auto}
 @media (max-width:820px){.side{position:static;max-height:none}}
 .side-group{padding:0 0 4px}
 .side-group + .side-group{border-top:2px solid var(--border);margin-top:6px;padding-top:6px}
@@ -164,7 +165,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--r-badge);outline-of
 
 /* ---------- Zone principale ---------- */
 main{background:var(--canvas);padding:10px 12px 40px;min-width:0}
-section{margin:0 0 14px;scroll-margin-top:52px}
+section{margin:0 0 14px;scroll-margin-top:calc(var(--topbar-h) + 6px)}
 .lede{max-width:66ch;color:var(--muted);margin:4px 0 10px}
 .card{background:var(--surface);border-radius:0;padding:8px 10px;filter:var(--shadow);margin:8px 0}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card{border:1px solid var(--border)}}
@@ -776,8 +777,12 @@ pre,code{font-size:var(--fs)}
 (function(){
   var links=[].slice.call(document.querySelectorAll('.side a, .topnav a'));
   var secs=[].slice.call(document.querySelectorAll('main section[id]'));
+  var bar=document.querySelector('.topbar');
+  function measure(){
+    document.documentElement.style.setProperty('--topbar-h',bar.offsetHeight+'px');
+  }
   function sync(){
-    var best=null,top=60;
+    var best=null,top=bar.offsetHeight;
     secs.forEach(function(s){
       var r=s.getBoundingClientRect();
       if(r.top<=top+4) best=s.id;
@@ -788,7 +793,8 @@ pre,code{font-size:var(--fs)}
     });
   }
   window.addEventListener('scroll',sync,{passive:true});
-  sync();
+  window.addEventListener('resize',function(){measure();sync();},{passive:true});
+  measure();sync();
 })();
 </script>
 </body>
