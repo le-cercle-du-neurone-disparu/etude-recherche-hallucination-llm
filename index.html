@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Cartographie des groupes de travail, papiers de recherche et publications grand public sur la détection d'hallucinations des LLM.">
+<style>
+:root{color-scheme:light dark}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Veille Hallucinations LLM</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Palatino&display=swap">
+<style>
+/* ---------- Jetons ---------- */
+:root{
+  /* Palette de roles */
+  --accent:hsl(222 55% 45%);      /* #345AB2 */
+  --c1:hsl(184 100% 33%);         /* #009DA8 */
+  --c2:hsl(143 58% 39%);          /* #2A9F56 */
+  --c3:hsl(18 93% 58%);           /* #F86F32 */
+  --c4:hsl(28 96% 64%);           /* #FB9E4E */
+
+  /* Roles par element */
+  --r-h1:var(--accent);
+  --r-h2:var(--c1);
+  --r-h3:var(--c2);
+  --r-h4:var(--c3);
+  --r-h5:var(--c4);
+  --r-h6:var(--ink);
+  --r-nav:hsl(222 55% 29%);       /* accent assombri : fond plein barre du haut */
+  --r-nav-text:hsl(222 45% 88%);
+  --r-side:hsl(222 52% 94%);      /* accent tres clair : fond plein sidebar */
+  --r-side-text:hsl(222 30% 28%);
+  --r-thead:var(--r-side);
+  --r-badge:var(--accent);
+  --r-link:var(--c1);
+
+  /* Neutres biaises vers l'accent */
+  --shell:hsl(222 22% 90%);
+  --canvas:hsl(222 25% 96%);
+  --surface:hsl(0 0% 100%);
+  --ink:hsl(222 22% 16%);
+  --muted:hsl(222 12% 42%);
+  --border:hsl(222 20% 82%);
+  --shell-border:hsl(222 20% 78%);
+  --shadow:drop-shadow(0 5px 16px hsl(222 40% 30% / .30));
+  --shadow-sm:drop-shadow(0 2px 7px hsl(222 40% 30% / .24));
+
+  /* Echelle de titres : une seule source (ratio 1.18 sur 15px) */
+  --fs:15px;
+  --fs-h6:15px; --fs-h5:17.7px; --fs-h4:20.9px;
+  --fs-h3:24.6px; --fs-h2:29.1px; --fs-h1:34.3px;
+
+  --f-title:"Palatino Linotype",Palatino,"Book Antiqua",serif;
+  --f-body:Georgia,"Iowan Old Style",Charter,serif;
+}
+/* Mode sombre : fonds noir plat neutre partout, separation par lignes */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --shell:hsl(0 0% 4%);
+    --canvas:hsl(0 0% 4%);
+    --surface:hsl(0 0% 12%);
+    --ink:hsl(0 0% 92%);
+    --muted:hsl(0 0% 62%);
+    --border:hsl(222 55% 80%);        /* Accent Clair */
+    --shell-border:hsl(222 55% 80%);
+    --r-nav:hsl(0 0% 4%);
+    --r-nav-text:hsl(222 55% 80%);
+    --r-side:hsl(0 0% 4%);
+    --r-side-text:hsl(222 55% 80%);
+    --r-thead:hsl(0 0% 12%);
+    /* Roles au palier "Moyen" */
+    --r-h1:hsl(222 55% 70%);
+    --r-h2:hsl(184 100% 43%);
+    --r-h3:hsl(143 58% 46%);
+    --r-h4:hsl(18 68% 54%);
+    --r-h5:hsl(28 96% 57%);
+    --r-h6:hsl(0 0% 92%);
+    --r-badge:hsl(222 55% 70%);
+    --r-link:hsl(184 68% 84%);
+    --shadow:drop-shadow(0 5px 16px hsl(0 0% 0% / .7));
+    --shadow-sm:drop-shadow(0 2px 7px hsl(0 0% 0% / .6));
+  }
+}
+:root[data-theme="dark"]{
+  --shell:hsl(0 0% 4%); --canvas:hsl(0 0% 4%); --surface:hsl(0 0% 12%);
+  --ink:hsl(0 0% 92%); --muted:hsl(0 0% 62%);
+  --border:hsl(222 55% 80%); --shell-border:hsl(222 55% 80%);
+  --r-nav:hsl(0 0% 4%); --r-nav-text:hsl(222 55% 80%);
+  --r-side:hsl(0 0% 4%); --r-side-text:hsl(222 55% 80%);
+  --r-thead:hsl(0 0% 12%);
+  --r-h1:hsl(222 55% 70%); --r-h2:hsl(184 100% 43%); --r-h3:hsl(143 58% 46%);
+  --r-h4:hsl(18 68% 54%); --r-h5:hsl(28 96% 57%); --r-h6:hsl(0 0% 92%);
+  --r-badge:hsl(222 55% 70%); --r-link:hsl(184 68% 84%);
+  --shadow:drop-shadow(0 5px 16px hsl(0 0% 0% / .7));
+  --shadow-sm:drop-shadow(0 2px 7px hsl(0 0% 0% / .6));
+}
+
+/* ---------- Base ---------- */
+*{box-sizing:border-box}
+body{background:var(--shell);color:var(--ink);font:var(--fs)/1.5 var(--f-body);margin:0}
+h1,h2,h3,h4,h5,h6{font-family:var(--f-title);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:var(--fs-h1);color:var(--r-h1)}
+h2{font-size:var(--fs-h2);color:var(--r-h2)}
+h3{font-size:var(--fs-h3);color:var(--r-h3);text-transform:uppercase;letter-spacing:.03em}
+h4{font-size:var(--fs-h4);color:var(--r-h4);text-transform:uppercase;letter-spacing:.04em}
+h5{font-size:var(--fs-h5);color:var(--r-h5);text-transform:uppercase;letter-spacing:.05em}
+h6{font-size:var(--fs-h6);color:var(--r-h6);text-transform:uppercase;letter-spacing:.06em}
+p,li,td,th,dd,dt{font-size:var(--fs)}
+a{color:var(--r-link);text-decoration:underline;text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--r-badge);outline-offset:2px}
+
+/* ---------- Barre du haut ---------- */
+.topbar{background:var(--r-nav);color:var(--r-nav-text);display:flex;align-items:baseline;
+  gap:14px;padding:6px 12px;filter:var(--shadow);position:relative;z-index:3;
+  border-bottom:1px solid var(--shell-border);flex-wrap:wrap}
+.topbar .brand{font-family:var(--f-title);font-size:var(--fs-h4);color:hsl(222 45% 96%)}
+.topbar .brand small{font-family:var(--f-body);font-size:var(--fs);color:var(--r-nav-text);
+  text-transform:none;letter-spacing:0}
+.topnav{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+.topnav a{color:var(--r-nav-text);text-decoration:none;padding:3px 9px;border-radius:4px;
+  font-size:var(--fs);transition:background .12s,color .12s}
+.topnav a:hover{background:hsl(222 55% 38%);color:hsl(222 45% 95%)}
+.topnav a.sel{background:hsl(222 50% 55%);color:hsl(0 0% 100%)}
+:root[data-theme="dark"] .topnav a:hover,
+:root:not([data-theme="light"]) .topnav a.sel{}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .topnav a:hover{background:hsl(0 0% 16%)}
+  :root:not([data-theme="light"]) .topnav a.sel{background:hsl(0 0% 22%);color:hsl(222 55% 88%)}
+}
+:root[data-theme="dark"] .topnav a:hover{background:hsl(0 0% 16%)}
+:root[data-theme="dark"] .topnav a.sel{background:hsl(0 0% 22%);color:hsl(222 55% 88%)}
+
+/* ---------- Coque ---------- */
+.shell{display:grid;grid-template-columns:236px minmax(0,1fr);gap:0;align-items:start}
+@media (max-width:820px){.shell{grid-template-columns:1fr}}
+
+/* ---------- Sidebar multi-niveaux ---------- */
+.side{background:var(--r-side);color:var(--r-side-text);padding:6px 0 14px;
+  filter:var(--shadow);border-right:1px solid var(--shell-border);
+  position:sticky;top:0;max-height:100vh;overflow:auto}
+@media (max-width:820px){.side{position:static;max-height:none}}
+.side-group{padding:0 0 4px}
+.side-group + .side-group{border-top:2px solid var(--border);margin-top:6px;padding-top:6px}
+.side-group-label{font-size:.72em;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);padding:3px 10px}
+.side-subgroup{padding-left:8px}
+.side-subgroup + .side-subgroup{border-top:1px dotted var(--border)}
+.side-subgroup-label{font-size:.64em;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--muted);padding:3px 10px}
+.side a{display:block;text-decoration:none;color:var(--r-side-text);padding:3px 10px;
+  font-size:1em;border-bottom:1px solid var(--border);transition:background .12s,color .12s}
+.side-subgroup a{font-size:.92em;padding-left:20px}
+.side a:hover{background:hsl(222 45% 87%);color:hsl(222 40% 20%)}
+.side a.sel{background:hsl(222 42% 78%);color:hsl(222 45% 14%)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .side a:hover{background:hsl(0 0% 14%)}
+  :root:not([data-theme="light"]) .side a.sel{background:hsl(0 0% 20%);color:hsl(222 55% 88%)}
+}
+:root[data-theme="dark"] .side a:hover{background:hsl(0 0% 14%)}
+:root[data-theme="dark"] .side a.sel{background:hsl(0 0% 20%);color:hsl(222 55% 88%)}
+
+/* ---------- Zone principale ---------- */
+main{background:var(--canvas);padding:10px 12px 40px;min-width:0}
+section{margin:0 0 14px;scroll-margin-top:52px}
+.lede{max-width:66ch;color:var(--muted);margin:4px 0 10px}
+.card{background:var(--surface);border-radius:0;padding:8px 10px;filter:var(--shadow);margin:8px 0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card{border:1px solid var(--border)}}
+:root[data-theme="dark"] .card{border:1px solid var(--border)}
+.card > h4,.card > h5,.card > h6{margin-bottom:4px}
+.grid{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));margin:8px 0}
+.grid .card{margin:0}
+ul,ol{margin:4px 0;padding-left:20px}
+li{margin:1px 0}
+li > ul{padding-left:16px}
+dl{margin:4px 0;display:grid;grid-template-columns:auto 1fr;gap:1px 8px}
+dt{font-weight:700;color:var(--muted)}
+dd{margin:0}
+
+/* ---------- Tableaux ---------- */
+.tw{overflow-x:auto;filter:var(--shadow);margin:8px 0;background:var(--surface)}
+table{border-collapse:collapse;width:100%;border-radius:0;background:var(--surface)}
+thead th{background:var(--r-thead);color:var(--r-side-text);text-align:left;
+  font-family:var(--f-title);font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:4px 8px;font-size:var(--fs);white-space:nowrap}
+tbody td{color:var(--ink);padding:4px 8px;vertical-align:top;
+  border-right:1px solid var(--border)}
+tbody td:last-child{border-right:0}
+tbody tr:nth-child(even) td{background:hsl(222 30% 97%)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) tbody tr:nth-child(even) td{background:hsl(0 0% 16%)}
+  :root:not([data-theme="light"]) .tw{border:1px solid var(--border)}
+}
+:root[data-theme="dark"] tbody tr:nth-child(even) td{background:hsl(0 0% 16%)}
+:root[data-theme="dark"] .tw{border:1px solid var(--border)}
+td.nowrap{white-space:nowrap}
+
+/* ---------- Etiquettes ---------- */
+.tag{display:inline-block;border-radius:10px;padding:0 8px;font-size:var(--fs);
+  font-family:var(--f-body);background:var(--r-badge);color:hsl(0 0% 100%);white-space:nowrap}
+:root[data-theme="dark"] .tag{color:hsl(0 0% 8%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tag{color:hsl(0 0% 8%)}}
+.tag.t1{background:var(--c1)} .tag.t2{background:var(--c2)}
+.tag.t3{background:var(--c3)} .tag.t4{background:var(--c4)}
+:root[data-theme="dark"] .tag.t1{background:hsl(184 100% 43%)}
+:root[data-theme="dark"] .tag.t2{background:hsl(143 58% 46%)}
+:root[data-theme="dark"] .tag.t3{background:hsl(18 68% 54%)}
+:root[data-theme="dark"] .tag.t4{background:hsl(28 96% 57%)}
+@media (prefers-color-scheme:dark){
+ :root:not([data-theme="light"]) .tag.t1{background:hsl(184 100% 43%)}
+ :root:not([data-theme="light"]) .tag.t2{background:hsl(143 58% 46%)}
+ :root:not([data-theme="light"]) .tag.t3{background:hsl(18 68% 54%)}
+ :root:not([data-theme="light"]) .tag.t4{background:hsl(28 96% 57%)}
+}
+
+/* ---------- Bouton ---------- */
+button{font:var(--fs) var(--f-body);border:0;border-radius:5px;padding:2px 10px;
+  cursor:pointer;color:hsl(0 0% 100%);background:var(--c1);filter:var(--shadow-sm);
+  transition:filter .12s,transform .12s}
+button:hover{filter:brightness(.92) var(--shadow-sm);transform:translateY(-1px)}
+@media (prefers-reduced-motion:reduce){button,.side a,.topnav a{transition:none}
+  button:hover{transform:none}}
+
+/* ---------- Bloc de code ---------- */
+pre{background:var(--surface);border-radius:0;padding:6px 8px;overflow-x:auto;
+  filter:var(--shadow);margin:6px 0;font-family:ui-monospace,"SFMono-Regular",Menlo,monospace}
+pre,code{font-size:var(--fs)}
+:root[data-theme="dark"] pre{border:1px solid var(--border)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) pre{border:1px solid var(--border)}}
+.foot{color:var(--muted);max-width:70ch;margin-top:14px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <span class="brand">Aletheia · Veille<br><small>Détection d'hallucinations LLM — état du terrain, septembre 2026</small></span>
+  <nav class="topnav">
+    <a class="sel" href="#groupes">Groupes</a>
+    <a href="#papiers">Papiers</a>
+    <a href="#public">Grand public</a>
+    <a href="#berlue">Pour Berlue</a>
+    <a href="#fiabilite">Fiabilité</a>
+  </nav>
+</header>
+
+<div class="shell">
+<aside class="side">
+  <div class="side-group">
+    <div class="side-group-label">Groupes de travail</div>
+    <a class="sel" href="#shared-tasks">Shared tasks</a>
+    <a href="#workshops">Workshops & conférences</a>
+    <a href="#labos">Laboratoires</a>
+    <div class="side-subgroup">
+      <div class="side-subgroup-label">Institutionnel</div>
+      <a href="#norme">Normalisation</a>
+      <a href="#france">France & Europe</a>
+    </div>
+    <div class="side-subgroup">
+      <div class="side-subgroup-label">Industrie</div>
+      <a href="#industrie">Éditeurs & open source</a>
+    </div>
+  </div>
+  <div class="side-group">
+    <div class="side-group-label">Papiers</div>
+    <a href="#surveys">Surveys de référence</a>
+    <a href="#causes">Causes & théorie</a>
+    <a href="#methodes">Méthodes de détection</a>
+    <a href="#benchmarks">Benchmarks</a>
+    <div class="side-subgroup">
+      <div class="side-subgroup-label">Verticales</div>
+      <a href="#domaines">Juridique & médical</a>
+    </div>
+  </div>
+  <div class="side-group">
+    <div class="side-group-label">Diffusion</div>
+    <a href="#public-en">Anglophone</a>
+    <a href="#public-fr">Francophone</a>
+  </div>
+  <div class="side-group">
+    <div class="side-group-label">Suite</div>
+    <a href="#berlue">Ce qu'on en fait</a>
+    <a href="#fiabilite">Niveau de fiabilité</a>
+  </div>
+</aside>
+
+<main>
+
+<section>
+  <h1>Détection d'hallucinations : qui travaille dessus, sur quoi</h1>
+  <p class="lede">Cartographie pour Aletheia / Berlue : les collectifs qui produisent des données
+  et des évaluations partagées, la littérature qui structure le champ, et ce qui en est arrivé
+  jusqu'à la presse. Chaque entrée porte un lien direct. La dernière section note explicitement
+  ce que je n'ai pas pu vérifier — sujet oblige.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h4>Le clivage qui structure tout</h4>
+      <p><strong>Factualité</strong> (la sortie contredit le monde réel) contre
+      <strong>fidélité</strong> (la sortie contredit le contexte fourni). Berlue étant un
+      détecteur, la question « lequel des deux » détermine s'il faut une source de vérité
+      externe ou seulement le contexte d'entrée.</p>
+    </div>
+    <div class="card">
+      <h4>Le clivage méthodologique</h4>
+      <p><strong>Boîte noire</strong> (échantillonnage et cohérence : SelfCheckGPT, entropie
+      sémantique) contre <strong>boîte blanche</strong> (sondes sur états internes, attention,
+      logits). Le second est plus précis et quasi gratuit à l'inférence, mais suppose l'accès
+      aux poids du modèle jugé.</p>
+    </div>
+    <div class="card">
+      <h4>Où se joue la compétition</h4>
+      <p>Les <strong>shared tasks</strong> (*SHROOM) fournissent l'annotation au niveau
+      <em>span</em>, le seul format qui permet de dire <em>où</em> ça hallucine et pas
+      seulement <em>si</em>. C'est le format le plus proche de ce qu'Aletheia doit afficher.</p>
+    </div>
+  </div>
+</section>
+
+<section id="groupes">
+  <h2>1. Groupes de travail et communautés</h2>
+</section>
+
+<section id="shared-tasks">
+  <h3>Shared tasks — la communauté la plus directement utile</h3>
+  <p>La série <strong>*SHROOM</strong> (Helsinki NLP) est le noyau communautaire du sujet :
+  jeux de données annotés, protocole d'évaluation partagé, dizaines d'équipes qui publient
+  leurs systèmes chaque année. C'est là qu'on trouve des baselines reproductibles.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Édition</th><th>Cadre</th><th>Apport</th><th>Lien</th></tr></thead>
+    <tbody>
+      <tr><td class="nowrap">SHROOM</td><td class="nowrap">SemEval-2024, tâche 6</td>
+        <td>4 000 sorties annotées par 5 annotateurs, sur 3 tâches (traduction, paraphrase,
+        modélisation de définitions). 42 équipes, 27 system papers.</td>
+        <td><a href="https://arxiv.org/abs/2403.07726">arXiv 2403.07726</a></td></tr>
+      <tr><td class="nowrap">Mu-SHROOM</td><td class="nowrap">SemEval-2025, tâche 3</td>
+        <td><strong>Multilingue (14 langues) et au niveau span.</strong> 43 équipes,
+        2 618 soumissions. Pointe le désaccord inter-annotateurs comme difficulté centrale.</td>
+        <td><a href="https://aclanthology.org/2025.semeval-1.322/">ACL Anthology</a> ·
+            <a href="https://arxiv.org/abs/2504.11975">arXiv 2504.11975</a></td></tr>
+      <tr><td class="nowrap">SHROOM-Visions</td><td class="nowrap">UncertaiNLP @ EMNLP 2026</td>
+        <td>4<sup>e</sup> édition, étendue aux modèles vision-langage, spans fins sur 4 langues.
+        <span class="tag t2">en cours</span></td>
+        <td><a href="https://helsinki-nlp.github.io/shroom/">helsinki-nlp.github.io/shroom</a></td></tr>
+    </tbody>
+  </table></div>
+  <div class="card">
+    <h5>Pourquoi c'est la première porte d'entrée</h5>
+    <p>Les données Mu-SHROOM sont publiques, en français parmi d'autres langues, et au format
+    span — exactement la granularité qu'un front comme Aletheia doit surligner. Un score sur
+    Mu-SHROOM est aussi la façon la plus rapide de situer Berlue face à 43 équipes déjà
+    mesurées sur le même terrain.</p>
+  </div>
+</section>
+
+<section id="workshops">
+  <h3>Workshops et lieux de publication</h3>
+  <div class="grid">
+    <div class="card">
+      <h4>UncertaiNLP</h4>
+      <p>3<sup>e</sup> édition à EMNLP 2026, Budapest, 29 octobre 2026. Le workshop dédié à
+      l'incertitude en TAL — hôte de SHROOM-Visions.
+      <a href="https://uncertainlp.github.io/">uncertainlp.github.io</a></p>
+    </div>
+    <div class="card">
+      <h4>TrustNLP</h4>
+      <p>6<sup>e</sup> Trustworthy NLP Workshop à ACL 2026. Traite l'hallucination comme un
+      thème parmi la confiance, la robustesse et les biais.
+      <a href="https://www.aclweb.org/portal/content/6th-trustworthy-nlp-workshop-acl-2026">Appel ACL</a></p>
+    </div>
+    <div class="card">
+      <h4>REALM</h4>
+      <p>Workshop EMNLP 2026 sur les systèmes à mémoire et récupération — pertinent pour la
+      fidélité en RAG. <a href="https://realm-workshop.github.io/">realm-workshop.github.io</a></p>
+    </div>
+    <div class="card">
+      <h4>Conférences principales</h4>
+      <p>ACL / EMNLP / NAACL (via ACL Rolling Review), ICLR et NeurIPS. Les travaux les plus
+      cités du domaine sortent de ces quatre.
+      <a href="https://2026.emnlp.org/calls/main_conference_papers/">CFP EMNLP 2026</a></p>
+    </div>
+  </div>
+</section>
+
+<section id="labos">
+  <h3>Laboratoires identifiables</h3>
+  <dl>
+    <dt>OATML — Oxford</dt>
+    <dd>Le groupe de Yarin Gal (avec Sebastian Farquhar, Jannik Kossen, Lorenz Kuhn),
+      auteur de l'<strong>entropie sémantique</strong> publiée dans <em>Nature</em> en 2024 —
+      la référence la plus citée côté détection non supervisée. Financement partiel Alan Turing
+      Institute. <a href="https://www.cs.ox.ac.uk/news/2345-full.html">Annonce Oxford CS</a></dd>
+    <dt>Stanford RegLab / HAI</dt>
+    <dd>Mesure empirique des hallucinations en contexte juridique, y compris sur les outils
+      commerciaux (Lexis+ AI, Westlaw). Produit aussi HELM et MedHELM côté évaluation.
+      <a href="https://reglab.stanford.edu/publications/hallucination-free-assessing-the-reliability-of-leading-ai-legal-research-tools/">RegLab</a></dd>
+    <dt>Helsinki NLP</dt>
+    <dd>Porte la série *SHROOM ci-dessus.</dd>
+    <dt>OpenAI (recherche)</dt>
+    <dd>Kalai, Nachum, Vempala et al. — l'argument « les évaluations récompensent le bluff »,
+      repris dans <em>Nature</em>. Voir section causes.</dd>
+  </dl>
+</section>
+
+<section id="norme">
+  <h3>Normalisation et institutions</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Organisme</th><th>Travaux</th><th>Statut</th></tr></thead>
+    <tbody>
+      <tr><td class="nowrap">CEN-CENELEC JTC 21</td>
+        <td>Normes harmonisées pour l'AI Act. <code>prEN 18229-2</code> « Trustworthiness
+        framework — Accuracy and Robustness » ; <code>prEN ISO/IEC 23282</code> méthodes
+        d'évaluation des systèmes TAL.</td>
+        <td><span class="tag t4">brouillons</span> travail en cours
+        <br><a href="https://jtc21.eu/">jtc21.eu</a> · <a href="https://www.cencenelec.eu/areas-of-work/cen-cenelec-topics/artificial-intelligence/">CEN-CENELEC</a></td></tr>
+      <tr><td class="nowrap">NIST</td>
+        <td>AI 100-5 — plan d'engagement sur les normes IA ; identifie terminologie, taxonomie
+        et méthodes de test/évaluation/vérification/validation comme urgentes.</td>
+        <td><a href="https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-5.pdf">PDF NIST</a></td></tr>
+      <tr><td class="nowrap">ISO/IEC</td>
+        <td>ISO/IEC 42001, premier système de management de l'IA certifiable — cadre dans lequel
+        la validation des sorties se justifie côté gouvernance.</td>
+        <td><span class="tag t2">publié</span></td></tr>
+      <tr><td class="nowrap">Réseau AISI</td>
+        <td><em>International AI Safety Report</em>, coordonné par Yoshua Bengio.</td>
+        <td><a href="https://arxiv.org/pdf/2501.17805">arXiv 2501.17805</a></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="france">
+  <h3>France et Europe</h3>
+  <div class="card">
+    <h5>INESIA</h5>
+    <p>Institut national pour l'évaluation et la sécurité de l'IA, sous coordination SGDSN.
+    Il fédère <strong>Inria</strong>, le <strong>LNE</strong>, le <strong>PEReN</strong> et
+    l'<strong>ANSSI</strong>. C'est l'interlocuteur institutionnel naturel côté français, et il
+    a annoncé un <em>leaderboard</em> avec le LNE intégrant des benchmarks en langue française —
+    un point d'accroche direct si Berlue vise le francophone.</p>
+    <p><a href="https://www.inria.fr/fr/creation-institut-evaluation-securite-intelligence-artificielle">Inria — création de l'INESIA</a> ·
+       <a href="https://www.sgdsn.gouv.fr/nos-missions/anticiper-et-prevenir/evaluer-et-securiser-lia">SGDSN</a> ·
+       <a href="https://www.peren.gouv.fr/en/actualites/2025-07-30_jointtesting_agentia/">PEReN — test conjoint d'agents</a></p>
+  </div>
+  <div class="card">
+    <h5>LNE — évaluation des systèmes d'IA</h5>
+    <p>Partenariat cadre Inria-LNE pour un programme « Évaluation de l'IA » : recherche,
+    expérimentation, contrôle. Le LNE est le laboratoire de métrologie — le seul acteur
+    français dont le métier est littéralement de définir comment on mesure.
+    <a href="https://www.lne.fr/en/testing/evaluation-artificial-intelligence-systems">lne.fr</a></p>
+  </div>
+  <div class="card">
+    <h5>AFNOR</h5>
+    <p>Groupe de travail IA (miroir national de JTC 21), auquel l'ANSSI participe. Voie d'entrée
+    si l'objectif est de peser sur la définition des méthodes d'évaluation plutôt que de les subir.
+    <a href="https://cyber.gouv.fr/enjeux-technologiques/intelligence-artificielle/">ANSSI — IA</a></p>
+  </div>
+</section>
+
+<section id="industrie">
+  <h3>Éditeurs et open source — les concurrents directs de Berlue</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Projet</th><th>Nature</th><th>Ce qu'il apporte</th><th>Lien</th></tr></thead>
+    <tbody>
+      <tr><td class="nowrap">Vectara HHEM</td><td>Modèle + leaderboard</td>
+        <td><code>HHEM-2.1-open</code> est le modèle open source de facto pour la fidélité en RAG.
+        Le <em>Hallucination Leaderboard</em> associé est « vivant » : modèle d'évaluation et
+        documents sources mis à jour en continu.</td>
+        <td><a href="https://huggingface.co/vectara/hallucination_evaluation_model">Hugging Face</a></td></tr>
+      <tr><td class="nowrap">Patronus Lynx</td><td>Modèle open weights</td>
+        <td>8B et 70B, détection de fidélité RAG, intégrable comme rail NeMo-Guardrails.
+        Option quand l'auto-hébergement est exigé (secteurs régulés).</td>
+        <td><a href="https://www.patronus.ai/blog/lynx-state-of-the-art-open-source-hallucination-detection-model">Patronus</a></td></tr>
+      <tr><td class="nowrap">LettuceDetect</td><td>Framework MIT</td>
+        <td>Classifieur au niveau <em>token</em> sur ModernBERT — contexte long, licence
+        permissive. La granularité span, comme Mu-SHROOM.</td>
+        <td><a href="https://huggingface.co/blog/adaamko/lettucedetect">Blog HF</a></td></tr>
+      <tr><td class="nowrap">RAGAS</td><td>Framework d'éval</td>
+        <td>Métriques de faithfulness / answer relevancy, très répandu comme couche de mesure.</td>
+        <td><span class="tag t1">open source</span></td></tr>
+      <tr><td class="nowrap">NeMo Guardrails</td><td>Rails NVIDIA</td>
+        <td>Couche de garde-fous avec rails fact-checking et grounding — pas un détecteur en soi.</td>
+        <td><span class="tag t1">open source</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="card">
+    <h5>Architecture que la pratique a fait converger</h5>
+    <p>Un petit détecteur rapide sur <em>chaque</em> requête (HHEM, Lynx, Luna) pour le scoring
+    en ligne, plus un LLM-juge sur un sous-échantillon pour l'analyse fine. Le tout-LLM-juge ne
+    passe pas à l'échelle en coût, le tout-petit-modèle rate les cas subtils.</p>
+  </div>
+</section>
+
+<section id="papiers">
+  <h2>2. Papiers de recherche</h2>
+</section>
+
+<section id="surveys">
+  <h3>Surveys — par où commencer</h3>
+  <ul>
+    <li><strong>Huang et al.</strong>, <em>A Survey on Hallucination in LLMs: Principles,
+      Taxonomy, Challenges, and Open Questions</em> — ACM TOIS. La taxonomie
+      factualité / fidélité que tout le monde reprend.
+      <a href="https://arxiv.org/abs/2311.05232">arXiv 2311.05232</a></li>
+    <li><strong>Large Language Models Hallucination: A Comprehensive Survey</strong> (2026) —
+      taxonomies structurées des approches de détection et des stratégies de mitigation.
+      <a href="https://arxiv.org/abs/2510.06265">arXiv 2510.06265</a></li>
+    <li><strong>Lifecycle-Based Survey</strong> (2026) — découpe les hallucinations en
+      données / entraînement / inférence, utile pour situer où un détecteur agit.
+      <a href="https://arxiv.org/abs/2608.26168">arXiv 2608.26168</a> <span class="tag t4">à vérifier</span></li>
+    <li><strong>Uncertainty Quantification for Hallucination Detection</strong> — fondements,
+      méthodologie, directions. <a href="https://arxiv.org/html/2510.12040v1">arXiv 2510.12040</a></li>
+    <li><strong>Hallucination to Truth</strong> — revue du fact-checking et de l'évaluation de
+      factualité, publiée dans <em>Artificial Intelligence Review</em>.
+      <a href="https://link.springer.com/article/10.1007/s10462-025-11454-w">Springer</a> ·
+      <a href="https://arxiv.org/html/2508.03860">arXiv 2508.03860</a></li>
+    <li><strong>A Survey of Multimodal Hallucination Evaluation and Detection</strong> — le
+      versant vision-langage. <a href="https://arxiv.org/html/2507.19024v2">arXiv 2507.19024</a></li>
+  </ul>
+</section>
+
+<section id="causes">
+  <h3>Causes et théorie</h3>
+  <div class="card">
+    <h4>Why Language Models Hallucinate</h4>
+    <p>Kalai, Nachum, Vempala et al. (OpenAI). Deux thèses : (1) les hallucinations sont
+    statistiquement prévisibles dès le pré-entraînement — un taux borné par le double du taux
+    d'erreur de classification ; (2) elles <em>persistent</em> parce que les évaluations notent
+    « je ne sais pas » comme une erreur, ce qui rend le bluff rentable. Remède proposé :
+    barème avec réponse correcte positive, abstention à zéro, erreur négative.</p>
+    <p><a href="https://arxiv.org/pdf/2509.04664">arXiv 2509.04664</a> ·
+       <a href="https://openai.com/index/why-language-models-hallucinate/">Billet OpenAI</a> ·
+       <a href="https://www.nature.com/articles/s41586-026-10549-w">Version Nature (2026)</a></p>
+    <h6>Pourquoi ça compte pour Berlue</h6>
+    <p>Un détecteur qui note l'abstention comme un succès change l'incitation en aval. Si
+    Aletheia expose un score, la façon dont il traite « je ne sais pas » est une décision de
+    conception, pas un détail.</p>
+  </div>
+</section>
+
+<section id="methodes">
+  <h3>Méthodes de détection</h3>
+
+  <h4>Boîte noire — cohérence entre échantillons</h4>
+  <ul>
+    <li><strong>SelfCheckGPT</strong> (Manakul et al., EMNLP 2023) — plusieurs générations pour
+      le même prompt, incohérence = signal d'hallucination. La baseline que tout le monde bat.</li>
+    <li><strong>Entropie sémantique</strong> (Farquhar, Kossen, Kuhn, Gal — <em>Nature</em> 2024) —
+      l'incertitude est calculée au niveau du <em>sens</em> : on regroupe les réponses
+      sémantiquement équivalentes avant de calculer l'entropie. Distingue « le modèle hésite sur
+      la formulation » de « le modèle hésite sur le fait ».</li>
+    <li><strong>Semantic Entropy Probes</strong> — approxime l'entropie sémantique depuis les
+      états cachés d'<em>une seule</em> génération. Ramène le coût à quasi zéro : c'est
+      l'astuce qui rend la méthode déployable.
+      <a href="https://arxiv.org/abs/2406.15927">arXiv 2406.15927</a></li>
+    <li><strong>FactSelfCheck</strong> — même idée descendue au niveau du fait individuel plutôt
+      que de la phrase. <a href="https://arxiv.org/pdf/2503.17229">arXiv 2503.17229</a></li>
+    <li><strong>Semantic Energy</strong> — au-delà de l'entropie.
+      <a href="https://arxiv.org/abs/2508.14496">arXiv 2508.14496</a></li>
+  </ul>
+
+  <h4>Boîte blanche — sondes sur l'interne</h4>
+  <ul>
+    <li><strong>Sondes d'états cachés</strong> — classifieur linéaire sur les représentations
+      d'une couche donnée. Famille dominante.</li>
+    <li><strong>Sondes dynamiques</strong> — quantifient le flux d'information entre couches
+      plutôt qu'un instantané.</li>
+    <li><strong>Structure d'attention</strong> — divergence topologique sur les graphes
+      d'attention <a href="https://arxiv.org/pdf/2504.10063">(arXiv 2504.10063)</a>, features
+      spectrales des cartes d'attention <a href="https://arxiv.org/html/2502.17598v2">(arXiv 2502.17598)</a>.</li>
+    <li><strong>LLM-Check</strong> — détection depuis logits et états internes, sans échantillonnage
+      multiple. <a href="https://par.nsf.gov/servlets/purl/10574407">PDF</a></li>
+    <li><strong>Détection temps réel non supervisée</strong> depuis les états internes.
+      <a href="https://arxiv.org/pdf/2403.06448">arXiv 2403.06448</a></li>
+  </ul>
+
+  <h4>Spécifique RAG</h4>
+  <ul>
+    <li><strong>ReDeEP</strong> (ICLR 2025) — détection via interprétabilité mécaniste :
+      sépare ce que le modèle tire du contexte de ce qu'il tire de sa mémoire paramétrique.</li>
+    <li><strong>Lynx</strong>, <strong>HHEM</strong>, <strong>LettuceDetect</strong> — voir la
+      section industrie ; ce sont aussi des papiers.</li>
+    <li><strong>Luna</strong> — modèle d'évaluation dédié, précision élevée et coût faible.
+      <a href="https://arxiv.org/pdf/2406.00975">arXiv 2406.00975</a></li>
+  </ul>
+
+  <h4>Garanties statistiques</h4>
+  <ul>
+    <li><strong>Principled Detection via Multiple Testing</strong> — cadre de tests multiples,
+      donc contrôle explicite du taux de faux positifs. Intéressant dès qu'il faut promettre un
+      seuil à un utilisateur. <a href="https://arxiv.org/pdf/2508.18473">arXiv 2508.18473</a></li>
+  </ul>
+</section>
+
+<section id="benchmarks">
+  <h3>Benchmarks et leaderboards</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Benchmark</th><th>Cible</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td class="nowrap">Mu-SHROOM</td><td>Spans, 14 langues</td>
+        <td>Le plus aligné avec un affichage type Aletheia.
+        <a href="https://aclanthology.org/2025.semeval-1.322/">lien</a></td></tr>
+      <tr><td class="nowrap">Vectara Hallucination Leaderboard</td><td>Fidélité en résumé / RAG</td>
+        <td>Leaderboard vivant, HHEM-2.1-open comme juge.</td></tr>
+      <tr><td class="nowrap">HalluLens</td><td>Généraliste</td>
+        <td>ACL 2025, sépare explicitement hallucination extrinsèque et intrinsèque.
+        <a href="https://arxiv.org/pdf/2504.17550">arXiv 2504.17550</a></td></tr>
+      <tr><td class="nowrap">FaithBench</td><td>Résumé</td>
+        <td>NAACL 2025, annotations humaines sur des LLM récents.</td></tr>
+      <tr><td class="nowrap">TruthfulQA</td><td>Factualité adversariale</td>
+        <td>Historique, saturé sur les modèles récents mais toujours cité.</td></tr>
+      <tr><td class="nowrap">HELM / MedHELM</td><td>Holistique, médical</td>
+        <td>Stanford CRFM ; MedHELM construit avec Stanford BMIR, Stanford Health Care et
+        Microsoft Health, cliniciens de 15 spécialités.</td></tr>
+      <tr><td class="nowrap">OpenHalDet, HalluScore, CAP, HALC-Bench</td>
+        <td>Unifié, QA, scientifique, contexte long</td>
+        <td>Vague 2026, à évaluer au cas par cas. <span class="tag t4">à vérifier</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="domaines">
+  <h3>Verticales — juridique et médical</h3>
+  <div class="grid">
+    <div class="card">
+      <h4>Juridique</h4>
+      <ul>
+        <li><em>Large Legal Fictions</em> (Stanford, 2024) — plus de 800 000 questions
+          juridiques vérifiables, taux d'hallucination de 58 % à 88 % sur les modèles
+          généralistes de 2023.</li>
+        <li><em>Hallucination-Free?</em> — mise à l'épreuve des outils commerciaux
+          (Lexis+ AI, Westlaw AI-Assisted Research).
+          <a href="https://reglab.stanford.edu/publications/hallucination-free-assessing-the-reliability-of-leading-ai-legal-research-tools/">RegLab</a></li>
+        <li><em>AI on Trial</em> — synthèse HAI grand public.
+          <a href="https://hai.stanford.edu/news/ai-trial-legal-models-hallucinate-1-out-6-or-more-benchmarking-queries">Stanford HAI</a></li>
+        <li>Veille continue côté bibliothécaires juridiques :
+          <a href="https://www.ailawlibrarians.com/2026/02/19/what-the-science-says-about-hallucinations-in-legal-research/">AI Law Librarians</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Médical</h4>
+      <ul>
+        <li><strong>MedHalu</strong> — hallucinations sur des questions de santé posées par des
+          patients. <a href="https://arxiv.org/pdf/2409.19492">arXiv 2409.19492</a></li>
+        <li><strong>MedHELM</strong> — extension médicale de HELM.</li>
+        <li><strong>ClinHallu</strong>, détection/correction dans les VLM médicaux par
+          contre-évidence — vague 2026. <span class="tag t4">à vérifier</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="card">
+    <h5>Citations inventées : le cas d'usage le plus lisible</h5>
+    <p>C'est le type d'hallucination le plus facile à vérifier automatiquement (la référence
+    existe ou non) et le plus dommageable en pratique. Voir <em>LLM hallucinations in the wild:
+    Large-scale evidence from non-existent citations</em>
+    <a href="https://arxiv.org/pdf/2605.07723">(arXiv 2605.07723)</a> et
+    <em>HalluCitation Matters</em> <a href="https://arxiv.org/pdf/2601.18724">(arXiv 2601.18724)</a>.
+    <span class="tag t4">à vérifier</span></p>
+  </div>
+</section>
+
+<section id="public">
+  <h2>3. Publications grand public</h2>
+</section>
+
+<section id="public-en">
+  <h3>Anglophone</h3>
+  <ul>
+    <li><strong>OpenAI</strong> — <em>Why language models hallucinate</em>, le billet de
+      vulgarisation le plus repris de 2025-2026.
+      <a href="https://openai.com/index/why-language-models-hallucinate/">openai.com</a></li>
+    <li><strong>Nature</strong> — <em>Evaluating LLMs for accuracy incentivizes hallucinations</em>,
+      qui fait passer l'argument des incitations dans la presse scientifique généraliste.
+      <a href="https://www.nature.com/articles/s41586-026-10549-w">nature.com</a></li>
+    <li><strong>Axios</strong> — <em>AI is still getting things wrong, more confidently than ever</em>
+      (mai 2026). <a href="https://www.axios.com/2026/05/30/ai-accuracy-chatbots-hallucinations">axios.com</a></li>
+    <li><strong>Étude Oxford Internet Institute / Nature</strong> — les chatbots plus
+      « chaleureux » produisent plus d'erreurs ; angle design, pas seulement modèle.
+      <a href="https://www.transparencycoalition.ai/news/friendlier-chatbots-produce-more-errors-new-nature-study-finds">résumé</a></li>
+    <li><strong>Live Science</strong> — l'effet en retour : l'usage de chatbots amplifie les
+      croyances erronées de l'utilisateur.
+      <a href="https://www.livescience.com/technology/artificial-intelligence/generative-ai-can-amplify-and-reinforce-our-delusions-findings-show">livescience.com</a></li>
+    <li><strong>Tech.co</strong> — liste tenue à jour des incidents publics.
+      <a href="https://tech.co/news/list-ai-failures-mistakes-errors">tech.co</a></li>
+    <li><strong>The Walrus</strong> — quand un média de référence se fait prendre à publier des
+      hallucinations. <a href="https://thewalrus.ca/the-new-york-times-got-caught-using-ai-hallucinations-in-its-reporting/">thewalrus.ca</a></li>
+  </ul>
+</section>
+
+<section id="public-fr">
+  <h3>Francophone</h3>
+  <ul>
+    <li><strong>Le Temps</strong> — <em>L'intelligence artificielle hallucine toujours
+      énormément, mais il y a des pistes pour limiter les dégâts</em>. Le papier de
+      vulgarisation le plus complet en français.
+      <a href="https://www.letemps.ch/cyber/l-intelligence-artificielle-hallucine-toujours-enormement-mais-il-y-a-des-pistes-pour-limiter-les-degats">letemps.ch</a></li>
+    <li><strong>Le Grand Continent</strong> — <em>Le modèle économique de ChatGPT repose sur ses
+      hallucinations</em> (mars 2026). Angle économique, utile pour un pitch.
+      <a href="https://legrandcontinent.eu/fr/2026/03/10/hallucination-ia-chatgpt/">legrandcontinent.eu</a></li>
+    <li><strong>Slate.fr</strong> — <em>D'où viennent les « hallucinations » des chatbots ?</em>
+      Explication du mécanisme, niveau grand public.
+      <a href="https://www.slate.fr/tech-internet/explication-hallucinations-chatbots-ia-generatives-intelligence-artificielle-fonctionnement-langage-ecriture-images-textes-mots-donnees-valeur-chatgpt">slate.fr</a></li>
+    <li><strong>Wikipédia FR</strong> — <em>Hallucination (intelligence artificielle)</em>,
+      article correctement sourcé, bon point de départ pour la terminologie française.
+      <a href="https://fr.wikipedia.org/wiki/Hallucination_(intelligence_artificielle)">fr.wikipedia.org</a></li>
+    <li><strong>LNE</strong> — <em>Intelligence artificielle : un cadre de confiance urgent</em>,
+      la position institutionnelle française.
+      <a href="https://www.lne.fr/fr/on-en-parle/intelligence-artificielle-cadre-confiance">lne.fr</a></li>
+    <li><strong>Critique du terme</strong> — <em>AI Hallucinations: A Misnomer Worth Clarifying</em>.
+      Argument à connaître : « hallucination » anthropomorphise et brouille le débat.
+      <a href="https://arxiv.org/pdf/2401.06796">arXiv 2401.06796</a></li>
+  </ul>
+</section>
+
+<section id="berlue">
+  <h2>4. Ce qu'on en tire pour Berlue</h2>
+  <div class="grid">
+    <div class="card">
+      <h4>Baselines à battre</h4>
+      <p>HHEM-2.1-open et Lynx pour la fidélité RAG, LettuceDetect pour le span-level,
+      SelfCheckGPT et les Semantic Entropy Probes pour le sans-contexte. Ce sont les quatre
+      chiffres qu'un lecteur technique attendra à côté de ceux de Berlue.</p>
+    </div>
+    <div class="card">
+      <h4>Jeux d'évaluation à brancher</h4>
+      <p>Mu-SHROOM d'abord (spans, français inclus, 43 équipes de référence), puis FaithBench
+      ou HalluLens selon que la cible est le résumé ou le généraliste. Le
+      <code>claude-doc/plan-branchement-eval.md</code> existant est le bon endroit où poser ça.</p>
+    </div>
+    <div class="card">
+      <h4>Décision de conception à trancher</h4>
+      <p>Factualité ou fidélité — Berlue ne peut pas répondre aux deux avec le même signal.
+      La fidélité ne demande que le contexte ; la factualité demande une source de vérité et
+      change tout le coût d'exploitation.</p>
+    </div>
+    <div class="card">
+      <h4>Angle différenciant possible</h4>
+      <p>Le francophone est peu couvert par les détecteurs open source, et l'INESIA annonce
+      justement un leaderboard avec benchmarks en français. Fenêtre étroite mais réelle.</p>
+    </div>
+  </div>
+</section>
+
+<section id="fiabilite">
+  <h2>5. Niveau de fiabilité de ce dossier</h2>
+  <p class="lede">Sujet oblige : voici ce que je tiens pour établi et ce qui reste à confirmer.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Catégorie</th><th>Statut</th><th>Détail</th></tr></thead>
+    <tbody>
+      <tr><td>Groupes, workshops, institutions</td><td><span class="tag t2">solide</span></td>
+        <td>Sites officiels, appels à communication, pages institutionnelles. Vérifier seulement
+        les dates exactes de deadline avant de s'en servir.</td></tr>
+      <tr><td>Papiers antérieurs à mi-2026</td><td><span class="tag t2">solide</span></td>
+        <td>Identifiants arXiv et ACL Anthology recoupés.</td></tr>
+      <tr><td>Papiers arXiv 26xx (2026)</td><td><span class="tag t4">à vérifier</span></td>
+        <td>Identifiants remontés par la recherche mais non ouverts un par un. Les vérifier avant
+        toute citation — c'est exactement le mode d'échec que Berlue détecte.</td></tr>
+      <tr><td>Chiffres de taux d'hallucination</td><td><span class="tag t3">prudence</span></td>
+        <td>Plusieurs pages agrégatrices (sqmagazine, suprmind, blogs « statistiques 2026 »)
+        citent des taux sans méthodologie traçable, et j'ai vu passer au moins un benchmark
+        (« BullshitBench v2 ») dont je n'ai trouvé aucune source primaire. Ne rien reprendre de
+        ces chiffres sans remonter au papier.</td></tr>
+      <tr><td>Références normatives (prEN)</td><td><span class="tag t4">à vérifier</span></td>
+        <td>Numéros et intitulés issus de résumés secondaires ; à confirmer sur le catalogue
+        CEN-CENELEC, les brouillons évoluent.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="foot">Recherche effectuée le 3 septembre 2026 par recherche web. Un dossier de veille
+  périme vite sur ce sujet : les shared tasks et les leaderboards vivants sont les seuls points
+  d'ancrage qui restent valables plusieurs mois.</p>
+</section>
+
+</main>
+</div>
+
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.side a, .topnav a'));
+  var secs=[].slice.call(document.querySelectorAll('main section[id]'));
+  function sync(){
+    var best=null,top=60;
+    secs.forEach(function(s){
+      var r=s.getBoundingClientRect();
+      if(r.top<=top+4) best=s.id;
+    });
+    if(!best&&secs.length) best=secs[0].id;
+    links.forEach(function(a){
+      a.classList.toggle('sel',a.getAttribute('href')==='#'+best);
+    });
+  }
+  window.addEventListener('scroll',sync,{passive:true});
+  sync();
+})();
+</script>
+</body>
+</html>
